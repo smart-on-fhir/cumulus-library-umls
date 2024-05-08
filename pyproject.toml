@@ -1,0 +1,65 @@
+[project]
+name = "cumulus-library-umls"
+requires-python = ">= 3.10"
+dependencies = [
+    "cumulus-library >= 2.1",
+]
+description = "A Unified Medical Language System® Metathesaurus study for the Cumulus project"
+readme = "README.md"
+license = { text="Apache License 2.0" }
+keywords = ["FHIR", "SQL", "Health Informatics"]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dynamic=["version"]
+[project.optional-dependencies]
+dev = [
+    "ruff == 0.2.1",
+    "pre-commit",
+]
+test = [
+    "pytest",
+    "responses"
+]
+
+[project.urls]
+Home = "https://smarthealthit.org/cumulus-a-universal-sidecar-for-a-smart-learning-healthcare-system/"
+Documentation = "https://docs.smarthealthit.org/cumulus/"
+Source = "https://github.com/smart-on-fhir/cumulus-library-umls"
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = [".sqlfluff"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "A",  # prevent using keywords that clobber python builtins
+    "B",  # bugbear: security warnings
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "I",  # isort
+    "ISC",  # implicit string concatenation
+    "PLE",  # pylint errors
+    "RUF",  # the ruff developer's own rules
+    "UP",  # alert you when better syntax is available in your python version
+]
+ignore = [
+# Recommended ingore from `ruff format` due to in-project conflicts with check.
+# It's expected that this will be fixed in the coming months.
+    "ISC001"
+]
