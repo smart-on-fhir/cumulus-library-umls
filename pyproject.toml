@@ -26,7 +26,7 @@ test = [
 ]
 
 [project.urls]
-Home = "https://smarthealthit.org/cumulus-a-universal-sidecar-for-a-smart-learning-healthcare-system/"
+Home = "https://smarthealthit.org/cumulus"
 Documentation = "https://docs.smarthealthit.org/cumulus/"
 Source = "https://github.com/smart-on-fhir/cumulus-library-umls"
 

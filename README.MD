@@ -1,6 +1,6 @@
 # Cumulus Library UMLS
 
-An installation of the Unified Medical Language System® Metathesaurus®. Part of the [SMART on FHIR Cumulus Project](https://smarthealthit.org/cumulus-a-universal-sidecar-for-a-smart-learning-healthcare-system/)
+An installation of the Unified Medical Language System® Metathesaurus®. Part of the [SMART on FHIR Cumulus Project](https://smarthealthit.org/cumulus)
 
 For more information, [browse the documentation](https://docs.smarthealthit.org/cumulus/library).
 ## Usage
@@ -17,7 +17,7 @@ This ends up being a fairly intensive operation - we download a large file,
 extract it, create parquet files from Athena, and then upload it. It usually
 takes a half hour to run. We try to preserve some of those artifacts along
 the way to make rebuilds faster. If you need to force recreation from scratch, the
-`--replace-existing` CLI flag will handle this.
+`--force-upload` CLI flag will handle this.
 
 ## Licensing details
 

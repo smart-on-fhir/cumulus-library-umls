@@ -12,7 +12,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
 
         :param root: the location at the base of the path you want to remove
 
-        TODO: replace with native pathlib.rmtree when upgrading to python 3.12
+        TODO: replace with native pathlib.walk when upgrading to python 3.12
         """
 
         # just in case, if we get passed a file (like if there's an error and a
