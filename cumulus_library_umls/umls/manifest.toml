@@ -4,3 +4,6 @@ study_prefix = "umls"
 file_names = [
     "umls_builder.py"
 ]
+
+[options]
+use_dedicated_schema="umls"
