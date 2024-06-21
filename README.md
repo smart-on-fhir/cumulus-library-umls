@@ -19,6 +19,10 @@ takes a half hour to run. We try to preserve some of those artifacts along
 the way to make rebuilds faster. If you need to force recreation from scratch, the
 `--force-upload` CLI flag will handle this.
 
+Note: This study is explicitly namespaced in its own schema, `umls`. Make sure your
+database is not using this schema for another use. Do not create tables inside this
+schema by another means.
+
 ## Licensing details
 
 The `cumulus-library-umls` study is provided as a convenience to install the

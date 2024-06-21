@@ -1,9 +1,9 @@
 [project]
-version = "0.1.0"
+version = "0.2.0"
 name = "cumulus-library-umls"
 requires-python = ">= 3.10"
 dependencies = [
-    "cumulus-library >= 2.1",
+    "cumulus-library >= 2.3",
 ]
 description = "A Unified Medical Language System® Metathesaurus study for the Cumulus project"
 readme = "README.md"
