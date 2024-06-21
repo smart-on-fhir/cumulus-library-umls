@@ -5,5 +5,5 @@ file_names = [
     "umls_builder.py"
 ]
 
-[options]
-use_dedicated_schema="umls"
+[advanced_options]
+dedicated_schema="umls"
