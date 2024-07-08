@@ -1,6 +1,7 @@
 downloads/
 generated_parquet/
 
+.DS_Store
 # project specific
 downloads/
 generated_parquet/

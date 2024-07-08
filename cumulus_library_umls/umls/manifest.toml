@@ -1,9 +1,0 @@
-study_prefix = "umls"
-
-[table_builder_config]
-file_names = [
-    "umls_builder.py"
-]
-
-[advanced_options]
-dedicated_schema="umls"

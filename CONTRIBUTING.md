@@ -1,4 +1,4 @@
-# Contributing to the UMLS study
+# Contributing to the RxNorm study
 
 ## Set up your dev environment
 

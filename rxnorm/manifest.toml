@@ -1,0 +1,9 @@
+study_prefix = "rxnorm"
+
+[table_builder_config]
+file_names = [
+    "rxnorm_builder.py"
+]
+
+[advanced_options]
+dedicated_schema="rxnorm"

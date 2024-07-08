@@ -1,12 +1,12 @@
 import pathlib
 
 import pandas
-from cumulus_library import base_table_builder, base_utils, databases
+from cumulus_library import base_table_builder, base_utils, study_manifest
 from cumulus_library.apis import umls
 from cumulus_library.template_sql import base_templates
 
 
-class UMLSBuilder(base_table_builder.BaseTableBuilder):
+class RxNormBuilder(base_table_builder.BaseTableBuilder):
     def rmtree(self, root: pathlib.Path):
         """Deletes a dir and all files underneath
 
@@ -27,7 +27,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                     p.unlink()
             root.rmdir()
 
-    def get_umls_data(
+    def get_rxnorm_data(
         self,
         download_path: pathlib.Path,
         parquet_path: pathlib.Path,
@@ -48,11 +48,12 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
         """
         api = umls.UmlsApi(api_key=umls_key)
         metadata = api.get_latest_umls_file_release(
-            target="umls-metathesaurus-full-subset"
+            target="rxnorm-full-monthly-release"
         )
         download_required = False
+
         if not (download_path / metadata["releaseVersion"]).exists():
-            print("New UMLS release available, downloading & updating...")
+            print("New RxNorm release available, downloading & updating...")
             download_required = True
             for version in download_path.iterdir():
                 self.rmtree(version)
@@ -60,14 +61,15 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                 self.rmtree(version)
         if download_required or force_upload:
             api.download_umls_files(
-                target="umls-metathesaurus-full-subset", path=download_path
+                target="rxnorm-full-monthly-release", path=download_path, unzip=False
             )
-        files = list(download_path.glob(f'./{metadata["releaseVersion"]}/META/*.ctl'))
-        filtered_files = []
-        for file in files:
-            if not file.stem.startswith("MRX"):
-                filtered_files.append(file)
-        return filtered_files, download_required, metadata["releaseVersion"]
+            base_utils.unzip_file(
+                download_path / metadata["fileName"], 
+                download_path / metadata["releaseVersion"]
+                )
+            (download_path / metadata["fileName"]).unlink()
+        files = list(download_path.glob(f'./{metadata["releaseVersion"]}/scripts/oracle/*.ctl'))
+        return files, download_required, metadata["releaseVersion"]
 
     def sql_type_to_df_parquet_type(self, text: str) -> str:
         """Converts types extract from the MySQL .ctl definition to parquet types
@@ -102,14 +104,25 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                 continue
             if line.startswith("infile"):
                 datasource = line.split(" ")[1].rstrip().replace("'", "")
+            elif line == "trailing nullcols(\n":
+                is_col_def_section = True
+                continue
             elif line.startswith("("):
                 is_col_def_section = True
                 line = line[1:]
-            elif line.startswith(")"):
+            elif line.strip(" ").startswith(")"):
                 is_col_def_section = False
             if is_col_def_section:
                 if line is not None:
                     line = line.strip().split("\t")
+                    # Some files in RxNorm ctls are formatted differently
+                    # (i.e. space deliniated, extra whitespace), so we 
+                    # do some sanity checking here.
+                    if len(line) == 1:
+                        if len(line[0]) ==0:
+                            continue
+                        else:
+                            line = line[0].split()
                     df_type, parquet_type = self.sql_type_to_df_parquet_type(line[1])
                     table["headers"].append(line[0])
                     table["dtype"][line[0]] = df_type
@@ -121,7 +134,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
         rrf_path: pathlib.Path,
         parquet_path: pathlib.Path,
         table: dict[list],
-        force_upload=False,
+        config:base_utils.StudyConfig,
     ):
         """Creates a parquet file from a .rrf metathesaurus file
 
@@ -131,9 +144,11 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
         :param force_upload: if true, upload to a remote source regardless of what
             already exists there
         """
-        if not force_upload:
-            if (parquet_path / f"{rrf_path.stem}.parquet").exists():
+        if not config.force_upload:
+            if (parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet").exists():
                 return
+            else:
+                (parquet_path / rrf_path.stem).mkdir(parents=True, exist_ok=True)
         df = pandas.read_csv(
             rrf_path,
             delimiter="|",
@@ -141,26 +156,25 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
             dtype=table["dtype"],
             index_col=False,
         )
-        df.to_parquet(parquet_path / f"{rrf_path.stem}.parquet")
+        df.to_parquet(parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet")
 
     def prepare_queries(
         self,
-        cursor: databases.DatabaseCursor,
-        schema: str,
+        config:base_utils.StudyConfig,
+        manifest: study_manifest.StudyManifest,
         *args,
-        config=base_utils.StudyConfig,
         **kwargs,
     ):
         download_path = pathlib.Path(__file__).resolve().parent / "downloads"
         download_path.mkdir(exist_ok=True, parents=True)
         parquet_path = pathlib.Path(__file__).resolve().parent / "generated_parquet"
         parquet_path.mkdir(exist_ok=True, parents=True)
-        files, new_version, folder = self.get_umls_data(
+        files, new_version, folder = self.get_rxnorm_data(
             download_path, parquet_path, config.force_upload, config.umls_key
         )
         parquet_path = parquet_path / folder
         parquet_path.mkdir(exist_ok=True, parents=True)
-
+        schema = base_utils.get_schema(config,manifest)
         with base_utils.get_progress_bar() as progress:
             task = progress.add_task(
                 None,
@@ -170,14 +184,14 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                 with open(file) as f:
                     datasource, table = self.parse_ctl_file(f.readlines())
                     progress.update(task, description=f"Compressing {datasource}...")
-                    rrf_path = download_path / f"./{folder}/META/{datasource}"
+                    rrf_path = download_path / f"./{folder}/scripts/oracle/{datasource}"
                     self.create_parquet(
-                        rrf_path, parquet_path, table, force_upload=config.force_upload
+                        rrf_path, parquet_path, table, config
                     )
                     progress.update(task, description=f"Uploading {datasource}...")
                     remote_path = config.db.upload_file(
-                        file=parquet_path / f"{file.stem}.parquet",
-                        study="umls",
+                        file=parquet_path / f"{file.stem}/{file.stem}.parquet",
+                        study="rxnorm",
                         topic=file.stem,
                         remote_filename=f"{file.stem}.parquet",
                         force_upload=config.force_upload or new_version,
@@ -185,8 +199,8 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                     self.queries.append(
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=schema,
-                            table_name=f"umls__{file.stem}",
-                            local_location=parquet_path / f"{file.stem}.parquet",
+                            table_name=f"rxnorm__{file.stem}",
+                            local_location=parquet_path / f"{file.stem}",
                             remote_location=remote_path,
                             table_cols=table["headers"],
                             remote_table_cols_types=table["parquet_types"],
