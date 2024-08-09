@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 import responses
-from cumulus_library import base_utils, databases, db_config
+from cumulus_library import base_utils, databases, db_config, study_manifest
 
 from cumulus_library_umls.umls import umls_builder
 
@@ -59,10 +59,13 @@ def test_create_query(mock_resolve, mock_responses, tmp_path):
 
     db_config.db_type = "duckdb"
     config = base_utils.StudyConfig(
-        db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"), umls_key="123"
+        db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"),
+        umls_key="123",
+        schema="main",
     )
     builder = umls_builder.UMLSBuilder()
-    builder.prepare_queries(cursor=config.db.cursor(), schema="main", config=config)
+    manifest = study_manifest.StudyManifest()
+    builder.prepare_queries(config=config, manifest=manifest)
     expected = f"""CREATE TABLE IF NOT EXISTS umls__TESTTABLE AS SELECT
     TTY,
     CODE
@@ -88,10 +91,13 @@ def test_create_query_download_exists(mock_resolve, mock_responses, tmp_path):
 
     db_config.db_type = "duckdb"
     config = base_utils.StudyConfig(
-        db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"), umls_key="123"
+        db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"),
+        umls_key="123",
+        schema="main",
     )
     builder = umls_builder.UMLSBuilder()
-    builder.prepare_queries(cursor=config.db.cursor(), schema="main", config=config)
+    manifest = study_manifest.StudyManifest()
+    builder.prepare_queries(config=config, manifest=manifest)
     download_dirs = sorted((tmp_path / "downloads").iterdir())
     assert len(download_dirs) == 1
     assert "2000AA" in str(download_dirs[0])
