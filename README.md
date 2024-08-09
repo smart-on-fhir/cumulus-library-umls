@@ -23,6 +23,17 @@ Note: This study is explicitly namespaced in its own schema, `umls`. Make sure y
 database is not using this schema for another use. Do not create tables inside this
 schema by another means.
 
+## Additional custom tables
+
+The following tables are a derived from the primary tables, and are included here as a 
+convenience to avoid having to compute these on a repeated basis
+
+- **mrrel_is_a** a subset of the relationships in mrrel, including only those that define
+that concept A is a member of concept B (i.e. is a child, or is explicitly marked as
+being a tradename/member belonging to the parent concept).
+- **mrconso_drugs** a subset of the entity list in mrconso, limited to vocabularies
+specifically dealing with drug identifiers (i.e. SNOMED, RxNorm, etc.)
+
 ## Licensing details
 
 The `cumulus-library-umls` study is provided as a convenience to install the

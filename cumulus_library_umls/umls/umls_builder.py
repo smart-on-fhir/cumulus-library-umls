@@ -1,7 +1,7 @@
 import pathlib
 
 import pandas
-from cumulus_library import base_table_builder, base_utils, databases
+from cumulus_library import base_table_builder, base_utils, study_manifest
 from cumulus_library.apis import umls
 from cumulus_library.template_sql import base_templates
 
@@ -145,10 +145,9 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
 
     def prepare_queries(
         self,
-        cursor: databases.DatabaseCursor,
-        schema: str,
+        config: base_utils.StudyConfig,
+        manifest: study_manifest.StudyManifest,
         *args,
-        config=base_utils.StudyConfig,
         **kwargs,
     ):
         download_path = pathlib.Path(__file__).resolve().parent / "downloads"
@@ -184,7 +183,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                     )
                     self.queries.append(
                         base_templates.get_ctas_from_parquet_query(
-                            schema_name=schema,
+                            schema_name=config.schema,
                             table_name=f"umls__{file.stem}",
                             local_location=parquet_path / f"{file.stem}.parquet",
                             remote_location=remote_path,
@@ -193,3 +192,17 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                         )
                     )
                     progress.advance(task)
+
+        # Section for resuable cross-study helper tables
+        self.queries.append(
+            """CREATE TABLE umls__mrrel_is_a AS
+SELECT * FROM umls.mrrel
+WHERE REL = 'CHD' 
+OR RELA in ('isa','tradename_of','has_tradename','has_basis_of_strength_substance')"""
+        )
+        self.queries.append(
+            """CREATE TABLE umls__mrconso_drugs AS
+SELECT * FROM umls.mrconso
+WHERE SAB in ('ATC','CVX','DRUGBANK','GS','MMSL','MMX','MTHCMSFRFMTHSPL','NDDF',
+    'RXNORM','SNOMEDCT_US','USP','VANDF')"""
+        )
