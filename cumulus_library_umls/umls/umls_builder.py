@@ -197,12 +197,13 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
         self.queries.append(
             """CREATE TABLE umls__mrrel_is_a AS
 SELECT * FROM umls.mrrel
-WHERE REL = 'CHD' 
-OR RELA in ('isa','tradename_of','has_tradename','has_basis_of_strength_substance')"""
+WHERE (REL = 'CHD' 
+OR RELA IN ('isa','tradename_of','has_tradename','has_basis_of_strength_substance'))
+AND REL NOT IN ('RB', 'PAR')"""
         )
         self.queries.append(
             """CREATE TABLE umls__mrconso_drugs AS
 SELECT * FROM umls.mrconso
-WHERE SAB in ('ATC','CVX','DRUGBANK','GS','MMSL','MMX','MTHCMSFRFMTHSPL','NDDF',
-    'RXNORM','SNOMEDCT_US','USP','VANDF')"""
+WHERE SAB IN ('ATC','CVX','DRUGBANK','GS','MED-RT','MMSL','MMX','MTHCMSFRF','MTHSPL',
+    'NDDF','RXNORM','SNOMEDCT_US','USP','VANDF')"""
         )
