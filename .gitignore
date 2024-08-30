@@ -1,10 +1,11 @@
 downloads/
 generated_parquet/
-
+*.parquet
 # project specific
 downloads/
 generated_parquet/
 output.sql
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
