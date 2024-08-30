@@ -5,7 +5,7 @@ import pytest
 import responses
 from cumulus_library import base_utils, databases, db_config, study_manifest
 
-from cumulus_library_umls.umls import umls_builder
+from cumulus_library_umls import umls_builder
 
 AUTH_URL = "https://utslogin.nlm.nih.gov/validateUser"
 RELEASE_URL = "https://uts-ws.nlm.nih.gov/releases"

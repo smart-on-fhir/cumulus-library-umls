@@ -1,0 +1,14 @@
+#REL (Relationship)	REL Description
+AQ	Allowed qualifier
+CHD	has child relationship in a UMLS Metathesaurus
+DEL	Deleted concept
+PAR	has parent relationship in a UMLS Metathesaurus
+QB	can be qualified by.
+RB	has a broader relationship
+RL	similar or alike or synonymous or self-referential CUI1 = CUI2
+RN	has a narrower relationship
+RO	has relationship other than synonymous, narrower, or broader
+RQ	related and possibly synonymous
+RU	Related, unspecified
+SY	source asserted synonymy.
+XR	Not related, no mapping

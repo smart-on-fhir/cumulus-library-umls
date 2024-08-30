@@ -2,7 +2,8 @@ study_prefix = "umls"
 
 [table_builder_config]
 file_names = [
-    "umls_builder.py"
+    "umls_builder.py",
+    "static_builder.py"
 ]
 
 [advanced_options]

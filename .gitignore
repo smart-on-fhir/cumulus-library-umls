@@ -1,6 +1,6 @@
 downloads/
 generated_parquet/
-
+*.parquet
 # project specific
 downloads/
 generated_parquet/
