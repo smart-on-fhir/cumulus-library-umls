@@ -72,7 +72,6 @@ def test_create_query(mock_resolve, mock_responses, tmp_path):
     p_builder.execute_queries(config=config, manifest=manifest)
     builder = umls_builder.UMLSBuilder()
     builder.execute_queries(config=config, manifest=manifest)
-    print(manifest)
     res = cursor.execute('SELECT * FROM "umls.TESTTABLE"').fetchall()
     assert res == [("TTY1", "Code-1"), ("TTY2", "Code-2"), ("TTY3", "Code-3")]
 

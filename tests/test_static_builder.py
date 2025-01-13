@@ -13,7 +13,6 @@ def test_static_tables(tmp_path):
     )
     db.connect()
     cursor = config.db.cursor()
-    print(cursor)
     cursor.execute("CREATE SCHEMA umls")
     manifest = study_manifest.StudyManifest()
     manifest._study_config = {
