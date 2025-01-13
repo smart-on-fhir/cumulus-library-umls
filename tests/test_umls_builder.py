@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 import responses
 from cumulus_library import base_utils, databases, db_config, study_manifest
+from cumulus_library.builders import protected_table_builder
 
 from cumulus_library_umls import umls_builder
 
@@ -61,18 +62,19 @@ def test_create_query(mock_resolve, mock_responses, tmp_path):
     config = base_utils.StudyConfig(
         db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"),
         umls_key="123",
-        schema="main",
+        schema="umls",
     )
+    config.db.connect()
+    cursor = config.db.cursor()
+    cursor.execute("CREATE SCHEMA umls")
+    manifest = study_manifest.StudyManifest(study_path="./cumulus_library_umls/")
+    p_builder = protected_table_builder.ProtectedTableBuilder()
+    p_builder.execute_queries(config=config, manifest=manifest)
     builder = umls_builder.UMLSBuilder()
-    manifest = study_manifest.StudyManifest()
-    builder.prepare_queries(config=config, manifest=manifest)
-    expected = f"""CREATE TABLE IF NOT EXISTS umls__TESTTABLE AS SELECT
-    TTY,
-    CODE
-FROM read_parquet('{
-        tmp_path / "generated_parquet/2000AA"
-    }/TESTTABLE.parquet/*.parquet')"""
-    assert expected == builder.queries[0]
+    builder.execute_queries(config=config, manifest=manifest)
+    print(manifest)
+    res = cursor.execute('SELECT * FROM "umls.TESTTABLE"').fetchall()
+    assert res == [("TTY1", "Code-1"), ("TTY2", "Code-2"), ("TTY3", "Code-3")]
 
 
 @mock.patch.dict(
@@ -95,8 +97,13 @@ def test_create_query_download_exists(mock_resolve, mock_responses, tmp_path):
         umls_key="123",
         schema="main",
     )
+    config.db.connect()
+    cursor = config.db.cursor()
+    cursor.execute("CREATE SCHEMA umls")
+    manifest = study_manifest.StudyManifest(study_path="./cumulus_library_umls/")
+    p_builder = protected_table_builder.ProtectedTableBuilder()
+    p_builder.execute_queries(config=config, manifest=manifest)
     builder = umls_builder.UMLSBuilder()
-    manifest = study_manifest.StudyManifest()
     builder.prepare_queries(config=config, manifest=manifest)
     download_dirs = sorted((tmp_path / "downloads").iterdir())
     assert len(download_dirs) == 1

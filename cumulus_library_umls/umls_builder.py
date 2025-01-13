@@ -1,12 +1,12 @@
 import pathlib
 
 import pandas
-from cumulus_library import base_table_builder, base_utils, study_manifest
+from cumulus_library import BaseTableBuilder, base_utils, log_utils, study_manifest
 from cumulus_library.apis import umls
 from cumulus_library.template_sql import base_templates
 
 
-class UMLSBuilder(base_table_builder.BaseTableBuilder):
+class UMLSBuilder(BaseTableBuilder):
     def rmtree(self, root: pathlib.Path):
         """Deletes a dir and all files underneath
 
@@ -47,9 +47,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
             - release_version - the name of the folder data was extracted to
         """
         api = umls.UmlsApi(api_key=umls_key)
-        metadata = api.get_latest_umls_file_release(
-            target="umls-metathesaurus-full-subset"
-        )
+        metadata = api.get_latest_umls_file_release(target="umls-metathesaurus-full-subset")
         download_required = False
         if not (download_path / metadata["releaseVersion"]).exists():
             print("New UMLS release available, downloading & updating...")
@@ -59,9 +57,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
             for version in (parquet_path).iterdir():
                 self.rmtree(version)
         if download_required or force_upload:
-            api.download_umls_files(
-                target="umls-metathesaurus-full-subset", path=download_path
-            )
+            api.download_umls_files(target="umls-metathesaurus-full-subset", path=download_path)
         files = list(download_path.glob(f'./{metadata["releaseVersion"]}/META/*.ctl'))
         filtered_files = []
         for file in files:
@@ -132,7 +128,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
             already exists there
         """
         if not force_upload:
-            if (parquet_path / f"{rrf_path.stem}.parquet").exists():
+            if (parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet").exists():
                 return
         df = pandas.read_csv(
             rrf_path,
@@ -141,7 +137,8 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
             dtype=table["dtype"],
             index_col=False,
         )
-        df.to_parquet(parquet_path / f"{rrf_path.stem}.parquet")
+        (parquet_path / f"{rrf_path.stem}").mkdir(parents=True, exist_ok=True)
+        df.to_parquet(parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet")
 
     def prepare_queries(
         self,
@@ -175,7 +172,7 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                     )
                     progress.update(task, description=f"Uploading {datasource}...")
                     remote_path = config.db.upload_file(
-                        file=parquet_path / f"{file.stem}.parquet",
+                        file=parquet_path / f"{file.stem}/{file.stem}.parquet",
                         study="umls",
                         topic=file.stem,
                         remote_filename=f"{file.stem}.parquet",
@@ -185,25 +182,15 @@ class UMLSBuilder(base_table_builder.BaseTableBuilder):
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=config.schema,
                             table_name=f"umls__{file.stem}",
-                            local_location=parquet_path / f"{file.stem}.parquet",
+                            local_location=parquet_path
+                            / f"{rrf_path.stem}"
+                            / f"{rrf_path.stem}.parquet",
                             remote_location=remote_path,
                             table_cols=table["headers"],
                             remote_table_cols_types=table["parquet_types"],
                         )
                     )
                     progress.advance(task)
-
-        # Section for resuable cross-study helper tables
-        self.queries.append(
-            """CREATE TABLE umls__mrrel_is_a AS
-SELECT * FROM umls.mrrel
-WHERE (REL = 'CHD' 
-OR RELA IN ('isa','tradename_of','has_tradename','has_basis_of_strength_substance'))
-AND REL NOT IN ('RB', 'PAR')"""
-        )
-        self.queries.append(
-            """CREATE TABLE umls__mrconso_drugs AS
-SELECT * FROM umls.mrconso
-WHERE SAB IN ('ATC','CVX','DRUGBANK','GS','MED-RT','MMSL','MMX','MTHCMSFRF','MTHSPL',
-    'NDDF','RXNORM','SNOMEDCT_US','USP','VANDF')"""
-        )
+            log_utils.log_transaction(
+                config=config, manifest=manifest, message=f"UMLS version: {folder}"
+            )
