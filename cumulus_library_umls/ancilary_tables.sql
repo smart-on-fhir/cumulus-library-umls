@@ -1,7 +1,7 @@
 -- A collection of convenience views for UMLS data
 
 -- Selecting only child relationships FROM mrrel
-CREATE TABLE IF NOT EXISTS umls__mrrel_is_a AS
+CREATE TABLE IF NOT EXISTS umls__mrrel_drug_is_a AS
 SELECT
     cui1,
     aui1,
