@@ -5,11 +5,13 @@ from cumulus_library_umls import static_builder
 
 def test_static_tables(tmp_path):
     db_config.db_type = "duckdb"
+    db = databases.DuckDatabaseBackend(f"{tmp_path}/duckdb")
     config = base_utils.StudyConfig(
-        db=databases.DuckDatabaseBackend(f"{tmp_path}/duckdb"),
+        db=db,
         umls_key="123",
         schema="main",
     )
+    db.connect()
     cursor = config.db.cursor()
     cursor.execute("CREATE SCHEMA umls")
     manifest = study_manifest.StudyManifest()
@@ -67,7 +69,7 @@ def test_static_tables(tmp_path):
             "last": ("vtbt", "T010", "Vertebrate"),
         },
     ]:
-        res = cursor.execute(f"SELECT * from umls.{table_conf['name']}").fetchall()
+        res = cursor.execute(f"SELECT * from \"umls.{table_conf['name']}\"").fetchall()
         assert len(res) == table_conf["size"]
         assert res[0] == table_conf["first"]
         assert res[-1] == table_conf["last"]

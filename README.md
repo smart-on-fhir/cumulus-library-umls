@@ -28,11 +28,18 @@ schema by another means.
 The following tables are a derived from the primary tables, and are included here as a 
 convenience to avoid having to compute these on a repeated basis
 
-- **mrrel_is_a** a subset of the relationships in mrrel, including only those that define
+- **mrrel_drug_is_a** a subset of the relationships in mrrel, including only those that define
 that concept A is a member of concept B (i.e. is a child, or is explicitly marked as
-being a tradename/member belonging to the parent concept).
+being a tradename/member belonging to the parent concept), for drugs and drug-related topics.
 - **mrconso_drugs** a subset of the entity list in mrconso, limited to vocabularies
 specifically dealing with drug identifiers (i.e. SNOMED, RxNorm, etc.)
+- **mrconso_icd10cm**/**mrrel__icd10cm** are slices of the respective main tables,
+only containing records from the ICD10 coding system
+- **icd10_(type)** are slices of a given coding system at the relevant level of the
+ICD10 hierarchy (category,block,chapter,code)
+- **icd10_tree** provides a relation-navigable code hierarchy of the individual levels
+in the ICD10 hierarchy
+
 
 ## Licensing details
 

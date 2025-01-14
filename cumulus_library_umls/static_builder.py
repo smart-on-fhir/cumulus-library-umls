@@ -3,7 +3,7 @@ import dataclasses
 import pathlib
 
 import pandas
-from cumulus_library import base_table_builder, base_utils, study_manifest
+from cumulus_library import BaseTableBuilder, base_utils, study_manifest
 from cumulus_library.template_sql import base_templates
 
 
@@ -17,10 +17,11 @@ class StaticTableConfig:
     headers: list[str]
     dtypes: dict
     parquet_types: list[str]
+    local_location: str
     ignore_header: bool = False
 
 
-class StaticBuilder(base_table_builder.BaseTableBuilder):
+class StaticBuilder(BaseTableBuilder):
     base_path = pathlib.Path(__file__).resolve().parent
     display_text = "Building static UMLS tables..."
 
@@ -29,6 +30,10 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             # https://lhncbc.nlm.nih.gov/ii/tools/MetaMap/documentation/SemanticTypesAndGroups.html
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/SemanticTypes_2018AB.txt",
+                local_location=str(
+                    self.base_path
+                    / "./static_files/SemanticTypes_2018AB/SemanticTypes_2018AB.parquet",
+                ),
                 delimiter="|",
                 table_name="semantic_types",
                 headers=["abbrev", "TUI", "full_type_name"],
@@ -41,6 +46,9 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             ),
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/SemGroups_2018.txt",
+                local_location=str(
+                    self.base_path / "./static_files/SemGroups_2018/SemGroups_2018.parquet",
+                ),
                 delimiter="|",
                 table_name="semantic_groups",
                 headers=["abbrev", "group_name", "TUI", "full_type_name"],
@@ -55,6 +63,9 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             # https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_rel.tsv",
+                local_location=str(
+                    self.base_path / "./static_files/umls_rel/umls_rel.parquet",
+                ),
                 delimiter="\t",
                 table_name="rel_description",
                 headers=["REL", "REL_STR"],
@@ -67,6 +78,9 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             ),
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_rela.tsv",
+                local_location=str(
+                    self.base_path / "./static_files/umls_rela/umls_rela.parquet",
+                ),
                 delimiter="\t",
                 table_name="rela_description",
                 headers=["RELA", "RELA_STR"],
@@ -79,6 +93,9 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             ),
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_tty.tsv",
+                local_location=str(
+                    self.base_path / "./static_files/umls_tty/umls_tty.parquet",
+                ),
                 delimiter="\t",
                 table_name="tty_description",
                 headers=["TTY", "TTY_STR"],
@@ -91,6 +108,9 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
             ),
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_tui.tsv",
+                local_location=str(
+                    self.base_path / "./static_files/umls_tui/umls_tui.parquet",
+                ),
                 delimiter="\t",
                 table_name="tui_description",
                 headers=["STY", "TUI", "TUI_STR"],
@@ -114,9 +134,7 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
         # fetch and add vsac tables
         self.tables = self.get_table_configs()
         with base_utils.get_progress_bar() as progress:
-            task = progress.add_task(
-                "Uploading UMLS dictionary files...", total=len(self.tables)
-            )
+            task = progress.add_task("Uploading UMLS dictionary files...", total=len(self.tables))
 
             for table in self.tables:
                 # Determine what we're using as a source file
@@ -151,7 +169,7 @@ class StaticBuilder(base_table_builder.BaseTableBuilder):
                     base_templates.get_ctas_from_parquet_query(
                         schema_name=config.schema,
                         table_name=f"{prefix}__{table.table_name}",
-                        local_location=parquet_path.parent,
+                        local_location=table.local_location,
                         remote_location=remote_path,
                         table_cols=table.headers,
                         remote_table_cols_types=table.parquet_types,
