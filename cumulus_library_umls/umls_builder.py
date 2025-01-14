@@ -127,8 +127,9 @@ class UMLSBuilder(BaseTableBuilder):
         :param force_upload: if true, upload to a remote source regardless of what
             already exists there
         """
+        parquet_path = parquet_path / rrf_path.stem
         if not force_upload:
-            if (parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet").exists():
+            if (parquet_path / f"{rrf_path.stem}.parquet").exists():
                 return
         df = pandas.read_csv(
             rrf_path,
@@ -137,8 +138,8 @@ class UMLSBuilder(BaseTableBuilder):
             dtype=table["dtype"],
             index_col=False,
         )
-        (parquet_path / f"{rrf_path.stem}").mkdir(parents=True, exist_ok=True)
-        df.to_parquet(parquet_path / f"{rrf_path.stem}/{rrf_path.stem}.parquet")
+        parquet_path.mkdir(parents=True, exist_ok=True)
+        df.to_parquet(parquet_path / f"{rrf_path.stem}.parquet")
 
     def prepare_queries(
         self,
@@ -151,10 +152,10 @@ class UMLSBuilder(BaseTableBuilder):
         download_path.mkdir(exist_ok=True, parents=True)
         parquet_path = pathlib.Path(__file__).resolve().parent / "generated_parquet"
         parquet_path.mkdir(exist_ok=True, parents=True)
-        files, new_version, folder = self.get_umls_data(
+        files, new_version, umls_version = self.get_umls_data(
             download_path, parquet_path, config.force_upload, config.umls_key
         )
-        parquet_path = parquet_path / folder
+        parquet_path = parquet_path / umls_version
         parquet_path.mkdir(exist_ok=True, parents=True)
 
         with base_utils.get_progress_bar() as progress:
@@ -166,7 +167,7 @@ class UMLSBuilder(BaseTableBuilder):
                 with open(file) as f:
                     datasource, table = self.parse_ctl_file(f.readlines())
                     progress.update(task, description=f"Compressing {datasource}...")
-                    rrf_path = download_path / f"./{folder}/META/{datasource}"
+                    rrf_path = download_path / f"./{umls_version}/META/{datasource}"
                     self.create_parquet(
                         rrf_path, parquet_path, table, force_upload=config.force_upload
                     )
@@ -192,5 +193,5 @@ class UMLSBuilder(BaseTableBuilder):
                     )
                     progress.advance(task)
             log_utils.log_transaction(
-                config=config, manifest=manifest, message=f"UMLS version: {folder}"
+                config=config, manifest=manifest, message=f"UMLS version: {umls_version}"
             )

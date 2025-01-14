@@ -269,7 +269,7 @@ SELECT
     str,
     5 AS depth
 FROM code_5
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,
@@ -280,7 +280,7 @@ SELECT
     str,
     6 AS depth
 FROM code_6
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,
@@ -291,7 +291,7 @@ SELECT
     str,
     7 AS depth
 FROM code_7
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,
@@ -314,7 +314,7 @@ SELECT
     str,
     2 AS depth
 FROM umls__icd10_chapter
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,
@@ -325,7 +325,7 @@ SELECT
     str,
     3 AS depth
 FROM umls__icd10_block
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,
@@ -336,7 +336,7 @@ SELECT
     str,
     4 AS depth
 FROM umls__icd10_category
-UNION
+UNION ALL
 SELECT
     rui,
     cui1,

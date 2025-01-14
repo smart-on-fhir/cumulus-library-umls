@@ -4,7 +4,7 @@ study_prefix = "umls"
 file_names = [
     "umls_builder.py",
     "static_builder.py",
-    "ancilary_tables.sql"
+    "ancilary_tables.sql",
 ]
 
 [advanced_options]
