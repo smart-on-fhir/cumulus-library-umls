@@ -79,7 +79,6 @@ def test_ancillary_tables(tmp_path):
             cursor.execute(query)
     tree = cursor.execute("SELECT  * FROM umls__icd10_tree ORDER BY rui ASC").fetchall()
     assert len(tree) == 584
-    print(tree[0])
     assert tree[0] == (
         "R115228242",
         "C0694449",

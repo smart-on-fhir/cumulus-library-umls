@@ -315,7 +315,7 @@ WITH chapter AS (
     SELECT
         code AS chapter_code,
         str AS chapter_str,
-        cui2 AS cui
+        cui2
     FROM umls__icd10_tree
     WHERE depth = 2
 ),
@@ -326,10 +326,10 @@ block AS (
         p.chapter_str,
         c.code AS block_code,
         c.str AS block_str,
-        c.cui2 AS cui
+        c.cui2
     FROM chapter AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui = c.cui1
+        ON p.cui2 = c.cui1
 ),
 
 category AS (
@@ -340,10 +340,10 @@ category AS (
         p.block_str,
         c.code AS category_code,
         c.str AS category_str,
-        c.cui2 AS cui
+        c.cui2
     FROM block AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui = c.cui1
+        ON p.cui2 = c.cui1
 ),
 
 subcategory_1 AS (
@@ -356,10 +356,10 @@ subcategory_1 AS (
         p.category_str,
         c.code AS subcategory_1_code,
         c.str AS subcategory_1_str,
-        c.cui2 AS cui
+        c.cui2
     FROM category AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui = c.cui1
+        ON p.cui2 = c.cui1
 ),
 
 subcategory_2 AS (
@@ -374,10 +374,10 @@ subcategory_2 AS (
         p.subcategory_1_str,
         c.code AS subcategory_2_code,
         c.str AS subcategory_2_str,
-        c.cui2 AS cui
+        c.cui2
     FROM subcategory_1 AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui = c.cui1
+        ON p.cui2 = c.cui1
         -- From here on out, we need to filter out some circular refs in UMLS,
         -- so we'll start looking for codes of specified lengths
         AND length(c.code) = 6
@@ -397,11 +397,11 @@ subcategory_3 AS (
         p.subcategory_2_str,
         c.code AS subcategory_3_code,
         c.str AS subcategory_3_str,
-        c.cui2 AS cui
+        c.cui2
     FROM subcategory_2 AS p
     LEFT JOIN umls__icd10_tree AS c
         ON
-            p.cui = c.cui1
+            p.cui2 = c.cui1
             AND length(c.code) = 7
 )
 
@@ -424,5 +424,5 @@ SELECT
 FROM subcategory_3 AS p
 LEFT JOIN umls__icd10_tree AS c
     ON
-        p.cui = c.cui1
+        p.cui2 = c.cui1
         AND length(c.code) = 8

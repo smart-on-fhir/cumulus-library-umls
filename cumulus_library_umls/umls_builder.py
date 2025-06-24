@@ -182,7 +182,7 @@ class UMLSBuilder(BaseTableBuilder):
                     self.queries.append(
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=config.schema,
-                            table_name=f"umls__{file.stem}",
+                            table_name=file.stem,
                             local_location=parquet_path
                             / f"{rrf_path.stem}"
                             / f"{rrf_path.stem}.parquet",
