@@ -58,7 +58,7 @@ class UMLSBuilder(BaseTableBuilder):
                 self.rmtree(version)
         if download_required or force_upload:
             api.download_umls_files(target="umls-metathesaurus-full-subset", path=download_path)
-        files = list(download_path.glob(f'./{metadata["releaseVersion"]}/META/*.ctl'))
+        files = list(download_path.glob(f"./{metadata['releaseVersion']}/META/*.ctl"))
         filtered_files = []
         for file in files:
             if not file.stem.startswith("MRX"):
@@ -182,7 +182,7 @@ class UMLSBuilder(BaseTableBuilder):
                     self.queries.append(
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=config.schema,
-                            table_name=f"umls__{file.stem}",
+                            table_name=file.stem,
                             local_location=parquet_path
                             / f"{rrf_path.stem}"
                             / f"{rrf_path.stem}.parquet",

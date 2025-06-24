@@ -1,4 +1,5 @@
 """Builder for UMLS files that generally do not change over time"""
+
 import dataclasses
 import pathlib
 

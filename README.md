@@ -36,10 +36,11 @@ specifically dealing with drug identifiers (i.e. SNOMED, RxNorm, etc.)
 - **mrconso_icd10cm**/**mrrel__icd10cm** are slices of the respective main tables,
 only containing records from the ICD10 coding system
 - **icd10_(type)** are slices of a given coding system at the relevant level of the
-ICD10 hierarchy (category,block,chapter,code)
+ICD10 hierarchy (category,block,chapter,subcategory[1-3], extension)
 - **icd10_tree** provides a relation-navigable code hierarchy of the individual levels
 in the ICD10 hierarchy
-
+- **icd10_hierarchy** provides a extracted tablular representation of the full ICD10
+code system
 
 ## Licensing details
 
