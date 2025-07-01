@@ -101,14 +101,14 @@ def test_ancillary_tables(tmp_path):
     hierarchy = cursor.execute(
         "SELECT  * FROM umls__icd10_hierarchy ORDER BY subcategory_2_code ASC"
     ).fetchall()
-    assert len(hierarchy) == 934
+    assert len(hierarchy) == 469
     assert hierarchy[0] == (
         "A00-B99",
         "Certain infectious and parasitic diseases (A00-B99)",
         "A50-A64",
         "Infections with a predominantly sexual mode of transmission (A50-A64)",
-        "A50.9",
-        "Congenital syphilis, unspecified",
+        "A50",
+        "Congenital syphilis",
         "A50.0",
         "Early congenital syphilis, symptomatic",
         "A50.01",
@@ -117,20 +117,24 @@ def test_ancillary_tables(tmp_path):
         None,
         None,
         None,
+        "A50.01",
     )
     assert hierarchy[-1] == (
-        "A00-B99",
-        "Certain infectious and parasitic diseases (A00-B99)",
-        "B99-B99",
-        "Other infectious diseases (B99)",
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
+        (
+            "A00-B99",
+            "Certain infectious and parasitic diseases (A00-B99)",
+            "B99-B99",
+            "Other infectious diseases (B99)",
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
     )

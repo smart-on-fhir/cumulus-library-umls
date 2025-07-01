@@ -360,6 +360,10 @@ subcategory_1 AS (
     FROM category AS p
     LEFT JOIN umls__icd10_tree AS c
         ON p.cui2 = c.cui1
+        -- From here on out, we need to filter out some circular refs in UMLS,
+        -- so we'll start looking for codes of specified lengths
+        AND length(c.code) = 5
+        AND c.code LIKE concat(p.category_code, '%')
 ),
 
 subcategory_2 AS (
@@ -377,10 +381,10 @@ subcategory_2 AS (
         c.cui2
     FROM subcategory_1 AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui2 = c.cui1
-        -- From here on out, we need to filter out some circular refs in UMLS,
-        -- so we'll start looking for codes of specified lengths
-        AND length(c.code) = 6
+        ON
+            p.cui2 = c.cui1
+            AND length(c.code) = 6
+            AND c.code LIKE concat(p.subcategory_1_code, '%')
 ),
 
 subcategory_3 AS (
@@ -403,6 +407,7 @@ subcategory_3 AS (
         ON
             p.cui2 = c.cui1
             AND length(c.code) = 7
+            AND c.code LIKE concat(p.subcategory_2_code, '%')
 )
 
 
@@ -420,9 +425,17 @@ SELECT
     p.subcategory_3_code,
     p.subcategory_3_str,
     c.code AS extension_code,
-    c.str AS extension_str
+    c.str AS extension_str,
+    coalesce(
+        c.code,
+        p.subcategory_3_code,
+        p.subcategory_2_code,
+        p.subcategory_1_code,
+        p.category_code
+    ) AS leaf_code
 FROM subcategory_3 AS p
 LEFT JOIN umls__icd10_tree AS c
     ON
         p.cui2 = c.cui1
         AND length(c.code) = 8
+        AND c.code LIKE concat(p.subcategory_1_code, '%')
