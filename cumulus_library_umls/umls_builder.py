@@ -132,15 +132,19 @@ class UMLSBuilder(BaseTableBuilder):
         if not force_upload:
             if (parquet_path / f"{rrf_path.stem}.parquet").exists():
                 return
-        df = pandas.read_csv(
+        chunks = pandas.read_csv(
             rrf_path,
             delimiter="|",
             names=table["headers"],
             dtype=table["dtype"],
             index_col=False,
+            chunksize=500000,
         )
         parquet_path.mkdir(parents=True, exist_ok=True)
-        df.to_parquet(parquet_path / f"{rrf_path.stem}.parquet")
+        filenum = 0
+        for chunk in chunks:
+            chunk.to_parquet(parquet_path / f"{rrf_path.stem}_{filenum}.parquet")
+            filenum += 1
 
     def prepare_queries(
         self,
@@ -174,20 +178,19 @@ class UMLSBuilder(BaseTableBuilder):
                         rrf_path, parquet_path, table, force_upload=config.force_upload
                     )
                     progress.update(task, description=f"Uploading {datasource}...")
-                    remote_path = config.db.upload_file(
-                        file=parquet_path / f"{file.stem}/{file.stem}.parquet",
-                        study="umls",
-                        topic=file.stem,
-                        remote_filename=f"{file.stem}.parquet",
-                        force_upload=config.force_upload or new_version,
-                    )
+                    for file_path in (parquet_path / file.stem).iterdir():
+                        remote_path = config.db.upload_file(
+                            file=file_path,
+                            study="umls",
+                            topic=file.stem,
+                            remote_filename=file_path.name,
+                            force_upload=config.force_upload or new_version,
+                        )
                     self.queries.append(
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=config.schema,
                             table_name=file.stem,
-                            local_location=parquet_path
-                            / f"{rrf_path.stem}"
-                            / f"{rrf_path.stem}.parquet",
+                            local_location=parquet_path / f"{rrf_path.stem}/*.parquet",
                             remote_location=remote_path,
                             table_cols=table["headers"],
                             remote_table_cols_types=table["parquet_types"],

@@ -68,7 +68,7 @@ def test_ancillary_tables(tmp_path):
             builder.create_parquet(rrf_path, tmp_path, table)
             cursor.execute(
                 f"""CREATE TABLE "umls__{file}" AS SELECT "{'","'.join(columns)}"
-            FROM read_parquet('{tmp_path}/{file}/{file}.parquet')"""
+            FROM read_parquet('{tmp_path}/{file}/{file}_0.parquet')"""
             )
 
     with open(
