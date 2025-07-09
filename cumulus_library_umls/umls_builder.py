@@ -149,7 +149,7 @@ class UMLSBuilder(BaseTableBuilder):
         *args,
         **kwargs,
     ):
-        base_path = pathlib.Path(platformdirs.user_cache_dir("cumulus_library", "smart-on-fhir"))
+        base_path = pathlib.Path(platformdirs.user_cache_dir("cumulus-library", "smart-on-fhir"))
         download_path = base_path / "downloads"
         download_path.mkdir(exist_ok=True, parents=True)
         parquet_path = base_path / "generated_parquet"
