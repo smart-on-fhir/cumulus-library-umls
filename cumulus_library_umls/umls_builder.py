@@ -1,8 +1,7 @@
-import os
 import pathlib
-import tempfile
 
 import pandas
+import platformdirs
 from cumulus_library import BaseTableBuilder, base_utils, log_utils, study_manifest
 from cumulus_library.apis import umls
 from cumulus_library.template_sql import base_templates
@@ -150,17 +149,7 @@ class UMLSBuilder(BaseTableBuilder):
         *args,
         **kwargs,
     ):
-        # We'll try to walk down a set of reasonable paths to find one that's writable.
-        # If we can't find one, we'll give up on caching the UMLS download and just
-        # write to a temporary directory.
-        for path in (
-            pathlib.Path(__file__).resolve().parent,
-            pathlib.Path.home(),
-            pathlib.Path(tempfile.TemporaryDirectory().name),
-        ):
-            if os.access(path, os.W_OK):
-                base_path = path / "umls_cache"
-                break
+        base_path = pathlib.Path(platformdirs.user_cache_dir("cumulus_library", "smart-on-fhir"))
         download_path = base_path / "downloads"
         download_path.mkdir(exist_ok=True, parents=True)
         parquet_path = base_path / "generated_parquet"
