@@ -159,11 +159,11 @@ class UMLSBuilder(BaseTableBuilder):
             pathlib.Path(tempfile.TemporaryDirectory().name),
         ):
             if os.access(path, os.W_OK):
-                download_path = path / "umls_cache"
+                base_path = path / "umls_cache"
                 break
-        download_path = pathlib.Path(__file__).resolve().parent / "downloads"
+        download_path = base_path / "downloads"
         download_path.mkdir(exist_ok=True, parents=True)
-        parquet_path = pathlib.Path(__file__).resolve().parent / "generated_parquet"
+        parquet_path = base_path / "generated_parquet"
         parquet_path.mkdir(exist_ok=True, parents=True)
         files, new_version, umls_version = self.get_umls_data(
             download_path, parquet_path, config.force_upload, config.umls_key
