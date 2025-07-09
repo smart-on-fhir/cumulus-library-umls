@@ -1,6 +1,7 @@
 import pathlib
 
 import pandas
+import platformdirs
 from cumulus_library import BaseTableBuilder, base_utils, log_utils, study_manifest
 from cumulus_library.apis import umls
 from cumulus_library.template_sql import base_templates
@@ -148,9 +149,10 @@ class UMLSBuilder(BaseTableBuilder):
         *args,
         **kwargs,
     ):
-        download_path = pathlib.Path(__file__).resolve().parent / "downloads"
+        base_path = pathlib.Path(platformdirs.user_cache_dir("cumulus-library", "smart-on-fhir"))
+        download_path = base_path / "downloads"
         download_path.mkdir(exist_ok=True, parents=True)
-        parquet_path = pathlib.Path(__file__).resolve().parent / "generated_parquet"
+        parquet_path = base_path / "generated_parquet"
         parquet_path.mkdir(exist_ok=True, parents=True)
         files, new_version, umls_version = self.get_umls_data(
             download_path, parquet_path, config.force_upload, config.umls_key

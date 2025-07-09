@@ -72,8 +72,6 @@ def test_create_query(mock_resolve, mock_responses, tmp_path):
     p_builder.execute_queries(config=config, manifest=manifest)
     builder = umls_builder.UMLSBuilder()
     builder.execute_queries(config=config, manifest=manifest)
-    print(builder.queries)
-    print(cursor.execute("select table_name from information_schema.tables").fetchall())
     res = cursor.execute('SELECT * FROM "umls"."TESTTABLE"').fetchall()
     assert res == [("TTY1", "Code-1"), ("TTY2", "Code-2"), ("TTY3", "Code-3")]
 
@@ -82,10 +80,9 @@ def test_create_query(mock_resolve, mock_responses, tmp_path):
     os.environ,
     clear=True,
 )
-@mock.patch("pathlib.Path.resolve")
+@mock.patch("platformdirs.user_cache_dir")
 def test_create_query_download_exists(mock_resolve, mock_responses, tmp_path):
-    mock_loc = tmp_path / "umls_builder.py"
-    mock_resolve.return_value = mock_loc
+    mock_resolve.return_value = tmp_path
 
     prev_download_path = tmp_path / "downloads/1999AA/"
     prev_download_path.mkdir(exist_ok=True, parents=True)
