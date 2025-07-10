@@ -138,7 +138,7 @@ class UMLSBuilder(BaseTableBuilder):
             names=table["headers"],
             dtype=table["dtype"],
             index_col=False,
-            chunksize=500000,
+            chunksize=500_000,
         )
         parquet_path.mkdir(parents=True, exist_ok=True)
         filenum = 0
