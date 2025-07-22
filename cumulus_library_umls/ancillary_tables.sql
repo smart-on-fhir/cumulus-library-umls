@@ -344,6 +344,9 @@ category AS (
     FROM block AS p
     LEFT JOIN umls__icd10_tree AS c
         ON p.cui2 = c.cui1
+        -- From here on out, we need to filter out some circular refs in UMLS,
+        -- so we'll start looking for codes of specified lengths
+        AND length(c.code) = 3
 ),
 
 subcategory_1 AS (
@@ -359,11 +362,10 @@ subcategory_1 AS (
         c.cui2
     FROM category AS p
     LEFT JOIN umls__icd10_tree AS c
-        ON p.cui2 = c.cui1
-        -- From here on out, we need to filter out some circular refs in UMLS,
-        -- so we'll start looking for codes of specified lengths
-        AND length(c.code) = 5
-        AND c.code LIKE concat(p.category_code, '%')
+        ON
+            p.cui2 = c.cui1
+            AND length(c.code) = 5
+            AND c.code LIKE concat(p.category_code, '%')
 ),
 
 subcategory_2 AS (
