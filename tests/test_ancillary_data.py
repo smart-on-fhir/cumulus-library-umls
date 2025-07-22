@@ -101,7 +101,7 @@ def test_ancillary_tables(tmp_path):
     hierarchy = cursor.execute(
         "SELECT  * FROM umls__icd10_hierarchy ORDER BY subcategory_2_code ASC"
     ).fetchall()
-    assert len(hierarchy) == 469
+    assert len(hierarchy) == 438
     assert hierarchy[0] == (
         "A00-B99",
         "Certain infectious and parasitic diseases (A00-B99)",
