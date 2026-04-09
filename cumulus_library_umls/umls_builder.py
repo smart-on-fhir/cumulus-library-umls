@@ -190,7 +190,7 @@ class UMLSBuilder(BaseTableBuilder):
                         base_templates.get_ctas_from_parquet_query(
                             schema_name=config.schema,
                             table_name=file.stem,
-                            local_location=parquet_path / f"{rrf_path.stem}/*.parquet",
+                            local_location=parquet_path / f"{rrf_path.stem}",
                             remote_location=remote_path,
                             table_cols=table["headers"],
                             remote_table_cols_types=table["parquet_types"],

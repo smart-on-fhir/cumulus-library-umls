@@ -32,8 +32,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/SemanticTypes_2018AB.txt",
                 local_location=str(
-                    self.base_path
-                    / "./static_files/SemanticTypes_2018AB/SemanticTypes_2018AB.parquet",
+                    self.base_path / "./static_files/SemanticTypes_2018AB/",
                 ),
                 delimiter="|",
                 table_name="semantic_types",
@@ -48,7 +47,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/SemGroups_2018.txt",
                 local_location=str(
-                    self.base_path / "./static_files/SemGroups_2018/SemGroups_2018.parquet",
+                    self.base_path / "./static_files/SemGroups_2018/",
                 ),
                 delimiter="|",
                 table_name="semantic_groups",
@@ -65,7 +64,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_rel.tsv",
                 local_location=str(
-                    self.base_path / "./static_files/umls_rel/umls_rel.parquet",
+                    self.base_path / "./static_files/umls_rel/",
                 ),
                 delimiter="\t",
                 table_name="rel_description",
@@ -80,7 +79,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_rela.tsv",
                 local_location=str(
-                    self.base_path / "./static_files/umls_rela/umls_rela.parquet",
+                    self.base_path / "./static_files/umls_rela/",
                 ),
                 delimiter="\t",
                 table_name="rela_description",
@@ -95,7 +94,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_tty.tsv",
                 local_location=str(
-                    self.base_path / "./static_files/umls_tty/umls_tty.parquet",
+                    self.base_path / "./static_files/umls_tty/",
                 ),
                 delimiter="\t",
                 table_name="tty_description",
@@ -110,7 +109,7 @@ class StaticBuilder(BaseTableBuilder):
             StaticTableConfig(
                 file_path=self.base_path / "./static_files/umls_tui.tsv",
                 local_location=str(
-                    self.base_path / "./static_files/umls_tui/umls_tui.parquet",
+                    self.base_path / "./static_files/umls_tui/",
                 ),
                 delimiter="\t",
                 table_name="tui_description",
