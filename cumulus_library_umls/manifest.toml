@@ -1,7 +1,7 @@
 study_prefix = "umls"
 
-[file_config]
-file_names = [
+[[stages.default]]
+files = [
     "umls_builder.py",
     "static_builder.py",
     "ancillary_tables.sql",
